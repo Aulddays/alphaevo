@@ -209,7 +209,7 @@ class AkShareAdapter(DataAdapter):
         df["prev_close"] = df["close"].shift(1)
 
         result = df[["date", "open", "high", "low", "close", "volume", "prev_close"]].copy()
-        return result
+        return cast("pd.DataFrame", result)
 
     @staticmethod
     def _empty_df() -> pd.DataFrame:

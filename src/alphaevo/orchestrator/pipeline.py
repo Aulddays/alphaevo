@@ -14,7 +14,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pandas as pd
 
@@ -691,7 +691,7 @@ class RunPipeline:
         for column in ("open", "high", "low"):
             if column not in benchmark_df.columns:
                 benchmark_df[column] = benchmark_df["close"]
-        return benchmark_df.reset_index(drop=True)
+        return cast("pd.DataFrame", benchmark_df.reset_index(drop=True))
 
     async def _call_optional_data_manager_method(
         self,

@@ -25,7 +25,7 @@ import importlib
 import logging
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pandas as pd
 
@@ -172,7 +172,10 @@ class DSAAdapter(DataAdapter):
         df = df.sort_values("date").reset_index(drop=True)
         df["prev_close"] = df["close"].shift(1)
 
-        return df[["date", "open", "high", "low", "close", "volume", "prev_close"]].copy()
+        return cast(
+            "pd.DataFrame",
+            df[["date", "open", "high", "low", "close", "volume", "prev_close"]].copy(),
+        )
 
     @staticmethod
     def _empty_df() -> pd.DataFrame:

@@ -455,7 +455,7 @@ class YFinanceAdapter(DataAdapter):
         result["prev_close"] = result["close"].shift(1)
 
         result = result.reset_index(drop=True)
-        return result
+        return cast("pd.DataFrame", result)
 
     @staticmethod
     def _empty_df() -> pd.DataFrame:

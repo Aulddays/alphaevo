@@ -1357,10 +1357,16 @@ class ReflectionAnalyzer:
             return "No failure cases recorded."
         lines: list[str] = []
         for s in evaluation.failure_cases[:10]:
+            if s.exit_reason is None:
+                exit_reason = None
+            elif isinstance(s.exit_reason, str):
+                exit_reason = s.exit_reason
+            else:
+                exit_reason = s.exit_reason.value
             base = (
                 f"- {s.symbol} {s.signal_date}: "
                 f"entry={s.entry_price:.2f} exit={s.exit_price or 0:.2f} "
-                f"return={s.return_pct:.2%} reason={s.exit_reason}"
+                f"return={s.return_pct:.2%} reason={exit_reason}"
             )
             if s.indicator_snapshot:
                 snap_parts = [

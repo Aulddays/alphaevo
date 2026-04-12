@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import inspect
 import re
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, cast
 
 import numpy as np
 import pandas as pd
@@ -889,7 +889,7 @@ def enrich_with_event_proxies(df: pd.DataFrame) -> pd.DataFrame:
     enriched["pre_event_close"] = pre_event_closes
     enriched["price_above_pre_event"] = price_above_pre_event
     enriched["already_overreacted"] = already_overreacted
-    return enriched
+    return cast("pd.DataFrame", enriched)
 
 
 def merge_event_context(

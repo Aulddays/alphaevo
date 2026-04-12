@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import pandas as pd  # type: ignore[import-untyped]
 
@@ -137,7 +137,7 @@ class DataManager:
 
         if self._cache is not None:
             self._cache.put(symbol, start, end, history)
-        return history.copy()
+        return cast("pd.DataFrame", history.copy())
 
     async def get_stock_list(self, market: MarketType) -> list[StockInfo]:
         """Get stock list with fallback."""
@@ -186,7 +186,7 @@ class DataManager:
                         continue
                     if self._cache is not None:
                         self._cache.put(cache_key, start, end, history)
-                    return history.copy()
+                    return cast("pd.DataFrame", history.copy())
             except Exception:
                 continue
         return pd.DataFrame()
@@ -260,7 +260,7 @@ class DataManager:
             normalized["prev_close"] = normalized["close"].shift(1)
 
         mask = (normalized["date"] >= start) & (normalized["date"] <= end)
-        return normalized.loc[mask].reset_index(drop=True)
+        return cast("pd.DataFrame", normalized.loc[mask].reset_index(drop=True))
 
 
 def get_adapter(config: AppConfig) -> DataAdapter:
