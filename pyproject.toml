@@ -61,7 +61,24 @@ dev = [
 tui = ["textual>=0.40"]
 charts = ["plotext>=5.0", "matplotlib>=3.7"]
 all = [
-    "alphaevo[llm,data-full,dev,tui,charts]",
+    "litellm>=1.40",
+    "yfinance>=0.2.0",
+    "akshare>=1.12.0",
+    "efinance>=0.5.5",
+    "tushare>=1.4.0",
+    "baostock>=0.8.8",
+    "build>=1.2",
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+    "pytest-cov>=4.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0",
+    "pandas-stubs>=2.0",
+    "types-PyYAML>=6.0",
+    "pre-commit>=3.0",
+    "textual>=0.40",
+    "plotext>=5.0",
+    "matplotlib>=3.7",
 ]
 
 [project.scripts]

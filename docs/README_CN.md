@@ -161,7 +161,7 @@ alphaevo leaderboard
          置信度 56.3%（从 8.1% 到这，涨了 48 个百分点）
 ```
 
-> 以上是真实运行结果，不是合成数据，不是启发式 fallback。完整报告建议在本地用 `alphaevo evolve --output ...` 生成。
+> 以上是真实运行结果，不是合成数据，不是启发式 fallback。完整报告建议在本地用 `alphaevo evolve <strategy_id> --output ...` 生成。
 
 ## 📋 策略 DSL 示例
 

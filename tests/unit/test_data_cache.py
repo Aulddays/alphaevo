@@ -170,13 +170,13 @@ class TestDataCache:
     def test_file_lock_prevents_corruption(self, cache, sample_df):
         """File lock context manager should acquire and release without error."""
         start, end = date(2024, 1, 1), date(2024, 1, 7)
-        target = cache._cache_path("TEST", start, end, ".parquet")
+        target = cache._cache_path("TEST", start, end, ".pkl")
         target.parent.mkdir(parents=True, exist_ok=True)
 
         # Lock should be acquirable and releasable
         with cache._file_lock(target):
-            # Inside lock we can write directly (not via put, which also locks)
-            sample_df.to_parquet(target, index=False)
+            # Use pickle here so the lock test does not depend on an optional parquet engine.
+            sample_df.to_pickle(target)
 
         result = cache.get("TEST", start, end)
         assert result is not None
