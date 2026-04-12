@@ -227,7 +227,9 @@ def factor_discover(
 
         store = FactorStore(config.db_path)
         try:
-            report_md = _render_factor_discovery_report(symbol, context or "", result, factor_store=store)
+            report_md = _render_factor_discovery_report(
+                symbol, context or "", result, factor_store=store
+            )
         finally:
             store.close()
         output_path.write_text(report_md, encoding="utf-8")

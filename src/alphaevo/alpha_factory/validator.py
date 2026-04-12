@@ -105,9 +105,7 @@ class FactorValidator:
 
         if directed_ir < self.thresholds.min_ir:
             if ir == 0.0 or np.sign(ir) != expected_sign:
-                reasons.append(
-                    f"IR {ir:.4f} contradicts expected {expected_direction} direction"
-                )
+                reasons.append(f"IR {ir:.4f} contradicts expected {expected_direction} direction")
             else:
                 reasons.append(f"Directional IR {directed_ir:.4f} < {self.thresholds.min_ir}")
 
@@ -228,9 +226,7 @@ class FactorValidator:
                 pd.DatetimeIndex(daily_ics.index).to_period("M")
             ).mean()
             return (
-                float((month_scores * expected_sign > 0).mean())
-                if len(month_scores) > 0
-                else 0.0
+                float((month_scores * expected_sign > 0).mean()) if len(month_scores) > 0 else 0.0
             )
 
         if dates is not None:
@@ -295,10 +291,9 @@ class FactorValidator:
                 if prev_ranks is not None:
                     common = prev_ranks.index.intersection(current_ranks.index)
                     if len(common) >= self.thresholds.min_cross_section_size:
-                        diff = (
-                            prev_ranks.loc[common].to_numpy(dtype=float)
-                            - current_ranks.loc[common].to_numpy(dtype=float)
-                        )
+                        diff = prev_ranks.loc[common].to_numpy(dtype=float) - current_ranks.loc[
+                            common
+                        ].to_numpy(dtype=float)
                         turnovers.append(float(np.mean(np.abs(diff)) / len(common)))
                 prev_ranks = current_ranks
 

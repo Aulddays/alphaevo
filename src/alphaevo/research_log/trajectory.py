@@ -206,11 +206,15 @@ def export_sharegpt(trajectory: EvolutionTrajectory, output_path: Path) -> Path:
             f"\nHow should we improve this strategy?"
         )
 
-        changes_text = "\n".join(
-            f"  - {c.get('change_type', '?')}: {c.get('target', '?')} "
-            f"({c.get('from_value', '?')} → {c.get('to_value', '?')})"
-            for c in step.changes
-        ) if step.changes else "  No changes proposed"
+        changes_text = (
+            "\n".join(
+                f"  - {c.get('change_type', '?')}: {c.get('target', '?')} "
+                f"({c.get('from_value', '?')} → {c.get('to_value', '?')})"
+                for c in step.changes
+            )
+            if step.changes
+            else "  No changes proposed"
+        )
 
         outcome_text = (
             f"Result: {'improved' if step.improved else 'no improvement'} "
@@ -238,17 +242,19 @@ def export_sharegpt(trajectory: EvolutionTrajectory, output_path: Path) -> Path:
             )
         assistant_turn += f"\n{outcome_text}"
 
-        conversations.append({
-            "conversations": [
-                {"from": "human", "value": user_turn},
-                {"from": "gpt", "value": assistant_turn},
-            ],
-            "metadata": {
-                "trajectory_id": trajectory.trajectory_id,
-                "round": step.round_num,
-                "improved": step.improved,
-            },
-        })
+        conversations.append(
+            {
+                "conversations": [
+                    {"from": "human", "value": user_turn},
+                    {"from": "gpt", "value": assistant_turn},
+                ],
+                "metadata": {
+                    "trajectory_id": trajectory.trajectory_id,
+                    "round": step.round_num,
+                    "improved": step.improved,
+                },
+            }
+        )
 
     with open(output_path, "a", encoding="utf-8") as f:
         for conv in conversations:

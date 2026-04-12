@@ -506,7 +506,9 @@ class Reporter:
         meta_count = sum(len(r.meta_insights) for r in result.rounds)
         lesson_count = sum(len(r.experience_lessons) for r in result.rounds)
         pattern_count = sum(len(r.pattern_context) for r in result.rounds)
-        cross_memory_count = sum(len(getattr(r, "cross_strategy_memory", [])) for r in result.rounds)
+        cross_memory_count = sum(
+            len(getattr(r, "cross_strategy_memory", [])) for r in result.rounds
+        )
         if meta_count or lesson_count or pattern_count:
             lines += [
                 "",

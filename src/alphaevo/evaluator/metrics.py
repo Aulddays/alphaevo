@@ -657,9 +657,7 @@ class Evaluator:
         # Recompute base_score without anti_fit for consistent comparison
         # (anti_fit doesn't change with parameter perturbation)
         base_score_raw = self.compute_confidence_score(
-            self.compute_metrics(
-                [s for s in signals if s.exit_price is not None]
-            ),
+            self.compute_metrics([s for s in signals if s.exit_price is not None]),
             strategy.complexity_score,
         )
         if base_score_raw <= 0:
@@ -790,10 +788,7 @@ class Evaluator:
     ) -> bool:
         """Return True if *sig_date* falls within the purge window around any test range."""
         purge = timedelta(days=purge_days)
-        return any(
-            start - purge <= sig_date <= end + purge
-            for start, end in test_ranges
-        )
+        return any(start - purge <= sig_date <= end + purge for start, end in test_ranges)
 
     # ── Strategy Fingerprint (deduplication) ──────────────────────────
 

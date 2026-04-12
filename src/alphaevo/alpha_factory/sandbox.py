@@ -257,7 +257,11 @@ def _check_future_data_access(tree: ast.AST) -> str | None:
             arg = node.args[0]
             if isinstance(arg, ast.UnaryOp) and isinstance(arg.op, ast.USub):
                 return "Future-data access: shift with negative periods looks ahead"
-            if isinstance(arg, ast.Constant) and isinstance(arg.value, (int, float)) and arg.value < 0:
+            if (
+                isinstance(arg, ast.Constant)
+                and isinstance(arg.value, (int, float))
+                and arg.value < 0
+            ):
                 return "Future-data access: shift with negative periods looks ahead"
 
         # Pattern: subscript with idx + positive_offset
@@ -329,23 +333,65 @@ def _run_in_subprocess(
                     else getattr(__builtins__, k, None),
                 )
                 for k in (
-                    "True", "False", "None",
-                    "int", "float", "str", "bool", "list", "tuple", "dict", "set",
-                    "frozenset", "bytes", "bytearray", "complex",
-                    "len", "range", "enumerate", "zip", "map", "filter",
-                    "sorted", "reversed", "min", "max", "sum", "abs", "round",
-                    "any", "all", "isinstance", "issubclass", "type",
-                    "hasattr", "id", "hash", "repr",
-                    "ValueError", "TypeError", "KeyError", "IndexError",
-                    "RuntimeError", "StopIteration", "ZeroDivisionError",
-                    "ArithmeticError", "Exception", "AttributeError",
+                    "True",
+                    "False",
+                    "None",
+                    "int",
+                    "float",
+                    "str",
+                    "bool",
+                    "list",
+                    "tuple",
+                    "dict",
+                    "set",
+                    "frozenset",
+                    "bytes",
+                    "bytearray",
+                    "complex",
+                    "len",
+                    "range",
+                    "enumerate",
+                    "zip",
+                    "map",
+                    "filter",
+                    "sorted",
+                    "reversed",
+                    "min",
+                    "max",
+                    "sum",
+                    "abs",
+                    "round",
+                    "any",
+                    "all",
+                    "isinstance",
+                    "issubclass",
+                    "type",
+                    "hasattr",
+                    "id",
+                    "hash",
+                    "repr",
+                    "ValueError",
+                    "TypeError",
+                    "KeyError",
+                    "IndexError",
+                    "RuntimeError",
+                    "StopIteration",
+                    "ZeroDivisionError",
+                    "ArithmeticError",
+                    "Exception",
+                    "AttributeError",
                 )
             )
             if v is not None
         }
         # Controlled __import__ that only allows whitelisted modules
-        _allowed_modules = {"numpy": np, "pandas": pd, "math": __import__("math"),
-                            "np": np, "pd": pd}
+        _allowed_modules = {
+            "numpy": np,
+            "pandas": pd,
+            "math": __import__("math"),
+            "np": np,
+            "pd": pd,
+        }
 
         def _safe_import(name: str, *args: Any, **kwargs: Any) -> Any:
             if name in _allowed_modules:

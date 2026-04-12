@@ -76,9 +76,7 @@ class StrategyMutator:
                 applied.append(change)
             except Exception as e:
                 if atomic:
-                    raise MutationError(
-                        f"Atomic mutation failed on {change.target}: {e}"
-                    ) from e
+                    raise MutationError(f"Atomic mutation failed on {change.target}: {e}") from e
                 logger.warning("Skipping change %s: %s", change.target, e)
 
         if not applied:

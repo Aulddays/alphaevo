@@ -414,11 +414,11 @@ def _build_synthetic_data() -> dict[str, pd.DataFrame]:
             "DEMO011",
             120.0,
             [
-                (20, 0.005, 0.008),   # initial up
+                (20, 0.005, 0.008),  # initial up
                 (25, -0.004, 0.014),  # crash
-                (15, 0.002, 0.012),   # volatile recovery
+                (15, 0.002, 0.012),  # volatile recovery
                 (20, -0.003, 0.013),  # second leg down (double bottom trap)
-                (40, 0.003, 0.010),   # real recovery
+                (40, 0.003, 0.010),  # real recovery
             ],
             [45, 46, 63, 64],  # signals during false AND real recovery
         ),
@@ -426,14 +426,14 @@ def _build_synthetic_data() -> dict[str, pd.DataFrame]:
             "DEMO012",
             70.0,
             [
-                (40, 0.004, 0.009),   # uptrend
+                (40, 0.004, 0.009),  # uptrend
                 (15, -0.006, 0.012),  # sharp selloff
-                (5, 0.008, 0.015),    # V-bounce (false signal)
+                (5, 0.008, 0.015),  # V-bounce (false signal)
                 (10, -0.003, 0.010),  # fails — double top trap
                 (15, -0.004, 0.012),  # extended decline
-                (3, -0.004, 0.005),   # washout
-                (4, 0.005, 0.010),    # real bounce
-                (28, 0.003, 0.010),   # recovery
+                (3, -0.004, 0.005),  # washout
+                (4, 0.005, 0.010),  # real bounce
+                (28, 0.003, 0.010),  # recovery
             ],
             [55, 56, 60, 90, 91],  # false AND real signals mixed
         ),
@@ -761,9 +761,7 @@ def run_demo(console: Console) -> None:
         )
         console.print(Text.from_ansi(f"\n{eq_chart}"))
 
-        dist_chart = Reporter.plot_return_distribution(
-            champ_trades, title="📊 Return Distribution"
-        )
+        dist_chart = Reporter.plot_return_distribution(champ_trades, title="📊 Return Distribution")
         console.print(Text.from_ansi(f"\n{dist_chart}"))
 
     # Meta-learning summary

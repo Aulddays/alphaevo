@@ -1719,15 +1719,9 @@ class EvolutionPipeline:
         """Return a user-facing reason when a version should not become champion."""
         min_signal_count = self.config.evolution.min_signal_count
         if evaluation.overall.signal_count < min_signal_count:
-            return (
-                "Sparse-signal result "
-                f"({evaluation.overall.signal_count}/{min_signal_count})"
-            )
+            return f"Sparse-signal result ({evaluation.overall.signal_count}/{min_signal_count})"
         if evaluation.anti_overfit.is_overfit:
-            return (
-                "Overfit detected "
-                f"(train_val_gap={evaluation.anti_overfit.train_val_gap:.1%})"
-            )
+            return f"Overfit detected (train_val_gap={evaluation.anti_overfit.train_val_gap:.1%})"
         if evaluation.overall.avg_return <= 0 and evaluation.overall.total_return <= 0:
             return (
                 "Non-positive trade payoff "
@@ -2078,11 +2072,7 @@ class EvolutionPipeline:
                     continue
                 family_count = len(bucket["families"])
                 strategies = bucket["strategies"]
-                example_sources = (
-                    ", ".join(strategies[:2])
-                    if strategies
-                    else "earlier strategies"
-                )
+                example_sources = ", ".join(strategies[:2]) if strategies else "earlier strategies"
                 memory.append(
                     f"Across {total} prior cross-strategy experiments from "
                     f"{family_count} other family/families, "
@@ -2102,7 +2092,9 @@ class EvolutionPipeline:
             for pattern in patterns:
                 source_strategy = pattern.source_strategy.strip()
                 source_family = (
-                    source_strategy.rsplit("_v", 1)[0] if "_v" in source_strategy else source_strategy
+                    source_strategy.rsplit("_v", 1)[0]
+                    if "_v" in source_strategy
+                    else source_strategy
                 )
                 if not source_strategy or source_family == family_id:
                     continue

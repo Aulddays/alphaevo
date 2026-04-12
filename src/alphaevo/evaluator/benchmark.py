@@ -173,7 +173,9 @@ class BenchmarkComparator:
 
         bh_drawdown = 0.0
         if all_closes:
-            avg_curve = pd.concat(all_closes, axis=1).mean(axis=1).replace([np.inf, -np.inf], np.nan)
+            avg_curve = (
+                pd.concat(all_closes, axis=1).mean(axis=1).replace([np.inf, -np.inf], np.nan)
+            )
             avg_curve = avg_curve.dropna()
             if not avg_curve.empty:
                 peak = avg_curve.cummax()
@@ -184,9 +186,13 @@ class BenchmarkComparator:
         # Benchmark Sharpe (simplified daily returns)
         bh_sharpe = 0.0
         if all_closes:
-            avg_curve = pd.concat(all_closes, axis=1).mean(axis=1).replace([np.inf, -np.inf], np.nan)
+            avg_curve = (
+                pd.concat(all_closes, axis=1).mean(axis=1).replace([np.inf, -np.inf], np.nan)
+            )
             avg_curve = avg_curve.dropna()
-            daily_ret = avg_curve.pct_change(fill_method=None).replace([np.inf, -np.inf], np.nan).dropna()
+            daily_ret = (
+                avg_curve.pct_change(fill_method=None).replace([np.inf, -np.inf], np.nan).dropna()
+            )
             if len(daily_ret) > 5 and daily_ret.std() > 0:
                 bh_sharpe = float(daily_ret.mean() / daily_ret.std() * (252**0.5))
 

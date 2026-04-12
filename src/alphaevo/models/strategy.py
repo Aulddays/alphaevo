@@ -283,9 +283,7 @@ class Strategy(BaseModel):
             anti.is_overfit or anti.train_val_gap > 0.10 or anti.param_sensitivity > 0.30
         )
         benchmark_trails_without_edge = (
-            benchmark is not None
-            and benchmark.excess_return < -0.03
-            and overall.win_rate < 0.48
+            benchmark is not None and benchmark.excess_return < -0.03 and overall.win_rate < 0.48
         )
         thesis_break_signals = preferred_regime_weak or benchmark_trails_without_edge
 
@@ -317,9 +315,7 @@ class Strategy(BaseModel):
             )
 
         if thesis_break_signals and (
-            overall.win_rate < 0.46
-            or overall.avg_return <= 0
-            or anti.train_val_gap <= 0.20
+            overall.win_rate < 0.46 or overall.avg_return <= 0 or anti.train_val_gap <= 0.20
         ):
             rationale = (
                 "The strategy underperforms in the regimes it claims to target, or it trails the "

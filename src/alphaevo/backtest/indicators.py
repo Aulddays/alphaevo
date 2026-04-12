@@ -199,7 +199,7 @@ def _compute_rsi(df: pd.DataFrame, idx: int, period: int) -> float:
         return 50.0
     changes = df["close"].diff().iloc[1 : idx + 1]  # all available diffs
     gains = changes.clip(lower=0)
-    losses = (-changes.clip(upper=0))
+    losses = -changes.clip(upper=0)
     # Wilder's smoothing: EMA with alpha = 1/period (com = period - 1)
     avg_gain = gains.ewm(com=period - 1, min_periods=period).mean().iloc[-1]
     avg_loss = losses.ewm(com=period - 1, min_periods=period).mean().iloc[-1]

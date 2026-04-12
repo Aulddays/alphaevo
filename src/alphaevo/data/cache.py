@@ -141,7 +141,9 @@ class DataCache:
                 logger.debug("Cached %d rows for %s (%s → %s)", len(df), symbol, start, end)
                 return
             except Exception as e:
-                logger.debug("Parquet cache write failed for %s, falling back to pickle: %s", symbol, e)
+                logger.debug(
+                    "Parquet cache write failed for %s, falling back to pickle: %s", symbol, e
+                )
 
             try:
                 df.to_pickle(pickle_path)

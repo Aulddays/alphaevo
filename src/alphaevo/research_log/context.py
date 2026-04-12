@@ -127,9 +127,7 @@ class ContextBuilder:
         ctx = ResearchContext()
 
         # ── Tier 1: Compressed state summary ──────────────────────
-        ctx.tier1_summary.content = self._build_summary(
-            strategy, evaluation, round_num=round_num
-        )
+        ctx.tier1_summary.content = self._build_summary(strategy, evaluation, round_num=round_num)
 
         # ── Tier 2: Retrieved relevant context ────────────────────
         tier2_parts: list[str] = []
@@ -277,7 +275,6 @@ class ContextBuilder:
             if r.reflection and r.reflection.proposed_changes:
                 for ch in r.reflection.proposed_changes:
                     lines.append(
-                        f"  • {ch.change_type.value} {ch.target}: "
-                        f"{ch.from_value} → {ch.to_value}"
+                        f"  • {ch.change_type.value} {ch.target}: {ch.from_value} → {ch.to_value}"
                     )
         return "\n".join(lines)

@@ -414,7 +414,8 @@ class PlaybookStore:
             for (action, target_cat), _count in top_actions:
                 # Find the best reason from matching records
                 matching_reasons = [
-                    a[2] for a in actions
+                    a[2]
+                    for a in actions
                     if a[0] == action and _categorize_target(a[1]) == target_cat
                 ]
                 best_reason = max(matching_reasons, key=len) if matching_reasons else ""

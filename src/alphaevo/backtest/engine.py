@@ -342,7 +342,11 @@ class BacktestEngine:
         if sl_config.type in ("pct", "pct_from_low") and sl_config.value is not None:
             return float(abs(position.entry_price * sl_config.value))
         elif sl_config.type == "atr":
-            atr_ind = f"atr_{sl_config.atr_period}" if sl_config.atr_period and sl_config.atr_period != 14 else "atr"
+            atr_ind = (
+                f"atr_{sl_config.atr_period}"
+                if sl_config.atr_period and sl_config.atr_period != 14
+                else "atr"
+            )
             atr_val = IndicatorRegistry.compute(atr_ind, df, idx, ctx)
             return float(atr_val * (sl_config.multiplier or 2.0))
         # Default: 5% risk (composite or unknown types)

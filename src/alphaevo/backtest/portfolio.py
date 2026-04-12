@@ -202,7 +202,9 @@ class PortfolioBacktester:
         total_return = (final_equity / cfg.initial_capital - 1) if cfg.initial_capital > 0 else 0.0
         max_dd = _compute_max_drawdown(equity_curve)
         sharpe = _compute_portfolio_sharpe(equity_curve)
-        cap_util = (total_capital_days / (total_days * cfg.max_positions)) if total_days > 0 else 0.0
+        cap_util = (
+            (total_capital_days / (total_days * cfg.max_positions)) if total_days > 0 else 0.0
+        )
 
         return PortfolioResult(
             config=cfg,

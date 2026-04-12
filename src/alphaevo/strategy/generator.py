@@ -177,7 +177,9 @@ class StrategyGenerator:
                     attempt + 1,
                     last_error,
                 )
-                error_text = "\n".join(dict.fromkeys(parse_errors)) if parse_errors else str(last_error)
+                error_text = (
+                    "\n".join(dict.fromkeys(parse_errors)) if parse_errors else str(last_error)
+                )
                 yaml_content = self._refine(normalized or yaml_content, error_text)
             else:
                 assert last_error is not None
