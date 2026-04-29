@@ -27,7 +27,18 @@
 
 AlphaEvo is a self-evolving stock strategy research agent. It turns a readable YAML strategy into a research loop: backtest, diagnose failure, propose a controlled mutation, re-test the new version, and keep the full evidence trail.
 
-### Real-data showcase
+### Flagship real-data result
+
+Live yfinance data, configured external LLM provider, `alphaevo evolve rsi_reversion_v1 --method llm`, April 10, 2026:
+
+| Strategy | Signals | Win Rate | Avg Return | Score |
+|----------|---------|----------|------------|-------|
+| `rsi_reversion_v1` baseline | 0 | 0.0% | 0.00% | 8.1% |
+| `rsi_reversion_v3` LLM champion | 498 | 52.6% | 1.22% | 56.3% |
+
+The default CLI showcase below uses a smaller frozen snapshot so anyone can reproduce it without an API key, but the stronger headline result is the LLM evolution path.
+
+### Reproducible no-key showcase
 
 Bundled frozen yfinance snapshot, US tech basket, 2025-02-11 to 2026-04-10:
 

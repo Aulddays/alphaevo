@@ -27,7 +27,18 @@
 
 AlphaEvo 用历史市场数据回测股票策略，并把策略放进完整研究闭环：回测、失败归因、结构化改写、再次验证、保留证据链。它把可执行 YAML DSL、防过拟合评估、研究日志和进化树整合到同一条研究工作流里。
 
-### 真实数据 Showcase
+### 旗舰真实数据结果
+
+实时 yfinance 数据，配置外部 LLM provider 后运行 `alphaevo evolve rsi_reversion_v1 --method llm`，时间为 2026-04-10：
+
+| 策略 | 信号数 | 胜率 | 平均收益 | 评分 |
+|------|--------|------|----------|------|
+| `rsi_reversion_v1` baseline | 0 | 0.0% | 0.00% | 8.1% |
+| `rsi_reversion_v3` LLM champion | 498 | 52.6% | 1.22% | 56.3% |
+
+下面的默认 CLI showcase 使用更小的冻结快照，因此任何人不配 API key 也能复现；但 README 首屏最强结果应该是 LLM 进化路径。
+
+### 可复现无 API Showcase
 
 内置 frozen yfinance 快照，美股科技股篮子，2025-02-11 到 2026-04-10：
 
