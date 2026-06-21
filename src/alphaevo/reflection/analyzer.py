@@ -510,7 +510,9 @@ class ReflectionAnalyzer:
             for rc in root_causes
             if isinstance(rc, dict) and rc.get("problem")
         ] + structural_issues
-        failure_patterns.extend(rc.strip() for rc in root_causes if isinstance(rc, str) and rc.strip())
+        failure_patterns.extend(
+            rc.strip() for rc in root_causes if isinstance(rc, str) and rc.strip()
+        )
 
         # Primary proposed_changes = top candidate's changes (backward compat)
         proposed_changes: list[StrategyChange] = []
