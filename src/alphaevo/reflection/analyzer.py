@@ -429,8 +429,13 @@ class ReflectionAnalyzer:
         if root_causes:
             lines = []
             for rc in root_causes:
-                sev = rc.get("severity", "medium")
-                lines.append(f"- [{sev.upper()}] {rc.get('problem', '')}: {rc.get('evidence', '')}")
+                if isinstance(rc, dict):
+                    sev = str(rc.get("severity", "medium"))
+                    lines.append(
+                        f"- [{sev.upper()}] {rc.get('problem', '')}: {rc.get('evidence', '')}"
+                    )
+                elif isinstance(rc, str) and rc.strip():
+                    lines.append(f"- [MEDIUM] {rc.strip()}")
             root_causes_text = "\n".join(lines)
         if structural_issues:
             root_causes_text += "\n\nStructural issues:\n" + "\n".join(
@@ -501,8 +506,11 @@ class ReflectionAnalyzer:
 
         # Build failure_patterns from root causes
         failure_patterns = [
-            rc.get("problem", "") for rc in root_causes if rc.get("problem")
+            rc.get("problem", "")
+            for rc in root_causes
+            if isinstance(rc, dict) and rc.get("problem")
         ] + structural_issues
+        failure_patterns.extend(rc.strip() for rc in root_causes if isinstance(rc, str) and rc.strip())
 
         # Primary proposed_changes = top candidate's changes (backward compat)
         proposed_changes: list[StrategyChange] = []

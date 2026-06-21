@@ -259,6 +259,54 @@ _STOCK_LISTS: dict[MarketType, list[dict]] = {
     ],
 }
 
+# Broaden the built-in A-share universe beyond the original 25-symbol smoke set.
+# These liquid large/mid-cap names give the sampler enough breadth when optional
+# full-universe providers (AkShare/DSA) are unavailable.  Market caps are coarse
+# liquidity proxies used only for universe filtering, not valuation research.
+_STOCK_LISTS[MarketType.A_SHARE].extend(
+    [
+        {"symbol": "000002.SZ", "name": "万科A", "sector": "地产", "market_cap": 80_000_000_000, "pe_ttm": 9.0},
+        {"symbol": "000063.SZ", "name": "中兴通讯", "sector": "通信", "market_cap": 150_000_000_000, "pe_ttm": 18.0},
+        {"symbol": "000100.SZ", "name": "TCL科技", "sector": "电子", "market_cap": 80_000_000_000, "pe_ttm": 16.0},
+        {"symbol": "000338.SZ", "name": "潍柴动力", "sector": "汽车", "market_cap": 120_000_000_000, "pe_ttm": 12.0},
+        {"symbol": "000568.SZ", "name": "泸州老窖", "sector": "白酒", "market_cap": 250_000_000_000, "pe_ttm": 20.0},
+        {"symbol": "000625.SZ", "name": "长安汽车", "sector": "汽车", "market_cap": 150_000_000_000, "pe_ttm": 16.0},
+        {"symbol": "000725.SZ", "name": "京东方A", "sector": "电子", "market_cap": 150_000_000_000, "pe_ttm": 18.0},
+        {"symbol": "000776.SZ", "name": "广发证券", "sector": "券商", "market_cap": 100_000_000_000, "pe_ttm": 15.0},
+        {"symbol": "000977.SZ", "name": "浪潮信息", "sector": "计算机", "market_cap": 80_000_000_000, "pe_ttm": 30.0},
+        {"symbol": "002142.SZ", "name": "宁波银行", "sector": "银行", "market_cap": 150_000_000_000, "pe_ttm": 7.0},
+        {"symbol": "002230.SZ", "name": "科大讯飞", "sector": "计算机", "market_cap": 100_000_000_000, "pe_ttm": 80.0},
+        {"symbol": "002371.SZ", "name": "北方华创", "sector": "半导体", "market_cap": 170_000_000_000, "pe_ttm": 55.0},
+        {"symbol": "002415.SZ", "name": "海康威视", "sector": "计算机", "market_cap": 300_000_000_000, "pe_ttm": 20.0},
+        {"symbol": "002475.SZ", "name": "立讯精密", "sector": "电子", "market_cap": 250_000_000_000, "pe_ttm": 22.0},
+        {"symbol": "300014.SZ", "name": "亿纬锂能", "sector": "电池", "market_cap": 90_000_000_000, "pe_ttm": 25.0},
+        {"symbol": "300015.SZ", "name": "爱尔眼科", "sector": "医疗服务", "market_cap": 100_000_000_000, "pe_ttm": 45.0},
+        {"symbol": "300059.SZ", "name": "东方财富", "sector": "券商", "market_cap": 220_000_000_000, "pe_ttm": 25.0},
+        {"symbol": "300124.SZ", "name": "汇川技术", "sector": "自动化", "market_cap": 150_000_000_000, "pe_ttm": 30.0},
+        {"symbol": "300274.SZ", "name": "阳光电源", "sector": "光伏", "market_cap": 150_000_000_000, "pe_ttm": 22.0},
+        {"symbol": "300308.SZ", "name": "中际旭创", "sector": "通信", "market_cap": 120_000_000_000, "pe_ttm": 35.0},
+        {"symbol": "600000.SS", "name": "浦发银行", "sector": "银行", "market_cap": 220_000_000_000, "pe_ttm": 6.0},
+        {"symbol": "600009.SS", "name": "上海机场", "sector": "机场", "market_cap": 90_000_000_000, "pe_ttm": 30.0},
+        {"symbol": "600050.SS", "name": "中国联通", "sector": "通信", "market_cap": 150_000_000_000, "pe_ttm": 16.0},
+        {"symbol": "600150.SS", "name": "中国船舶", "sector": "军工", "market_cap": 160_000_000_000, "pe_ttm": 45.0},
+        {"symbol": "600406.SS", "name": "国电南瑞", "sector": "电力设备", "market_cap": 180_000_000_000, "pe_ttm": 22.0},
+        {"symbol": "600438.SS", "name": "通威股份", "sector": "光伏", "market_cap": 90_000_000_000, "pe_ttm": 12.0},
+        {"symbol": "600585.SS", "name": "海螺水泥", "sector": "建材", "market_cap": 120_000_000_000, "pe_ttm": 9.0},
+        {"symbol": "600887.SS", "name": "伊利股份", "sector": "消费", "market_cap": 180_000_000_000, "pe_ttm": 18.0},
+        {"symbol": "601012.SS", "name": "隆基绿能", "sector": "光伏", "market_cap": 150_000_000_000, "pe_ttm": 14.0},
+        {"symbol": "601088.SS", "name": "中国神华", "sector": "煤炭", "market_cap": 700_000_000_000, "pe_ttm": 11.0},
+        {"symbol": "601328.SS", "name": "交通银行", "sector": "银行", "market_cap": 500_000_000_000, "pe_ttm": 6.0},
+        {"symbol": "601601.SS", "name": "中国太保", "sector": "保险", "market_cap": 250_000_000_000, "pe_ttm": 8.0},
+        {"symbol": "601668.SS", "name": "中国建筑", "sector": "建筑", "market_cap": 220_000_000_000, "pe_ttm": 5.0},
+        {"symbol": "601688.SS", "name": "华泰证券", "sector": "券商", "market_cap": 140_000_000_000, "pe_ttm": 13.0},
+        {"symbol": "601816.SS", "name": "京沪高铁", "sector": "交通运输", "market_cap": 250_000_000_000, "pe_ttm": 25.0},
+        {"symbol": "601857.SS", "name": "中国石油", "sector": "石油", "market_cap": 1_500_000_000_000, "pe_ttm": 10.0},
+        {"symbol": "601919.SS", "name": "中远海控", "sector": "航运", "market_cap": 180_000_000_000, "pe_ttm": 8.0},
+        {"symbol": "603288.SS", "name": "海天味业", "sector": "消费", "market_cap": 200_000_000_000, "pe_ttm": 35.0},
+        {"symbol": "603501.SS", "name": "韦尔股份", "sector": "半导体", "market_cap": 120_000_000_000, "pe_ttm": 40.0},
+    ]
+)
+
 # Mapping from calendar days to yfinance period strings.
 _DAYS_TO_PERIOD: list[tuple[int, str]] = [
     (5, "5d"),

@@ -879,11 +879,11 @@ def enrich_with_event_proxies(df: pd.DataFrame) -> pd.DataFrame:
     enriched = df.copy()
     prev_close = enriched["close"].shift(1).fillna(enriched["close"])
     volume_baseline = enriched["volume"].rolling(5, min_periods=1).mean().shift(1)
-    volume_ratio = (enriched["volume"] / volume_baseline.replace(0, pd.NA)).fillna(1.0)
-    gap_pct = ((enriched["open"] - prev_close) / prev_close.replace(0, pd.NA)).fillna(0.0)
-    day_return = ((enriched["close"] - prev_close) / prev_close.replace(0, pd.NA)).fillna(0.0)
+    volume_ratio = (enriched["volume"] / volume_baseline.replace(0, np.nan)).fillna(1.0)
+    gap_pct = ((enriched["open"] - prev_close) / prev_close.replace(0, np.nan)).fillna(0.0)
+    day_return = ((enriched["close"] - prev_close) / prev_close.replace(0, np.nan)).fillna(0.0)
     intraday_return = (
-        (enriched["close"] - enriched["open"]) / enriched["open"].replace(0, pd.NA)
+        (enriched["close"] - enriched["open"]) / enriched["open"].replace(0, np.nan)
     ).fillna(0.0)
     event_flag = (
         ((gap_pct.abs() >= 0.025) | (day_return.abs() >= 0.045)) & (volume_ratio >= 1.5)

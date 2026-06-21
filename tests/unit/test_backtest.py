@@ -1,5 +1,6 @@
 """Tests for backtest engine: indicators, conditions, rules, and engine."""
 
+import warnings
 from datetime import date, timedelta
 from unittest.mock import patch
 
@@ -9,7 +10,7 @@ import pytest
 
 from alphaevo.backtest.condition import ConditionEvaluator
 from alphaevo.backtest.engine import BacktestEngine
-from alphaevo.backtest.indicators import IndicatorRegistry
+from alphaevo.backtest.indicators import IndicatorRegistry, enrich_with_event_proxies
 from alphaevo.backtest.rules import MarketRuleChecker
 from alphaevo.models.enums import (
     ExitReason,
@@ -117,6 +118,16 @@ class TestIndicatorRegistry:
         assert "price_position_Nd" in available
         assert "volume_ratio_1d_Nd" in available
         assert "relative_strength_Nd" in available
+
+    def test_event_proxy_enrichment_avoids_fillna_downcast_warning(self) -> None:
+        df = _make_ohlcv(10)
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always", FutureWarning)
+            enriched = enrich_with_event_proxies(df)
+
+        assert "negative_news_score" in enriched.columns
+        assert not any("Downcasting object dtype arrays" in str(w.message) for w in caught)
 
     def test_compute_unknown_indicator_raises(self) -> None:
         df = _make_ohlcv(5)
