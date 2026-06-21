@@ -134,9 +134,16 @@ class TestGetStockList:
         adapter = YFinanceAdapter()
         stocks = _run(adapter.get_stock_list(MarketType.A_SHARE))
 
-        assert len(stocks) > 0
+        assert len(stocks) >= 60
         symbols = [s.symbol for s in stocks]
         assert any(s.endswith(".SZ") or s.endswith(".SS") for s in symbols)
+
+    def test_a_share_curated_universe_has_sampler_metadata(self):
+        adapter = YFinanceAdapter()
+        stocks = _run(adapter.get_stock_list(MarketType.A_SHARE))
+
+        assert len({s.sector for s in stocks if s.sector}) >= 12
+        assert sum(s.market_cap is not None for s in stocks) >= 60
 
     def test_hk_stocks(self):
         adapter = YFinanceAdapter()

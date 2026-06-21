@@ -332,6 +332,19 @@ class TestTwoStepReflection:
 
         assert "Strategy logic inverted" in result.failure_patterns
 
+    def test_string_root_causes_are_supported(self, llm):
+        diag = {
+            "root_causes": ["Momentum fades after entry"],
+            "diagnosis_summary": "string issue",
+            "structural_issues": [],
+        }
+        _mock_llm_responses(llm, [diag, _experiment_response()])
+        analyzer = ReflectionAnalyzer(llm, max_changes=3)
+
+        result = analyzer.reflect(_make_strategy(), _make_evaluation())
+
+        assert "Momentum fades after entry" in result.failure_patterns
+
     def test_research_summary_injected_into_prompt(self, llm):
         """Research summary should appear in the LLM prompt context."""
         captured_messages = []
