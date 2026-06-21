@@ -2,7 +2,7 @@
 """Validate builtin strategies against real market data.
 
 Usage:
-    python scripts/validate_real_data.py [--adapter yfinance] [--days 365]
+    python scripts/validate_real_data.py [--adapter auto] [--days 365]
 
 Runs each builtin strategy on real data, generates a standardised report with:
   - Annual return, max drawdown, Sharpe ratio
@@ -10,7 +10,7 @@ Runs each builtin strategy on real data, generates a standardised report with:
   - CPCV diagnostics
   - Benchmark comparison
 
-Requires a network-accessible data adapter (yfinance or akshare).
+Requires a network-accessible data adapter (auto, tencent, yfinance, or akshare).
 """
 
 from __future__ import annotations
@@ -43,7 +43,12 @@ _DEFAULT_SYMBOLS = {
         "000001", "000002", "600519", "601318", "000858",
         "002415", "600036", "000333", "601012", "000568",
     ],
+    "tencent": [
+        "000001", "000002", "600519", "601318", "000858",
+        "002415", "600036", "000333", "601012", "000568",
+    ],
 }
+_DEFAULT_SYMBOLS["auto"] = _DEFAULT_SYMBOLS["tencent"]
 
 
 async def _fetch_data(
@@ -54,21 +59,22 @@ async def _fetch_data(
 ) -> dict[str, pd.DataFrame]:
     """Fetch historical data for the given symbols."""
     from alphaevo.core.config import ConfigManager
-    from alphaevo.data.adapter import DataManager
+    from alphaevo.data.adapter import DataManager, get_adapter_chain
     from alphaevo.data.cache import DataCache
 
     config = ConfigManager().load()
 
-    if adapter_name == "yfinance":
-        from alphaevo.data.adapters.yfinance import YFinanceAdapter
-        adapter = YFinanceAdapter()
-    elif adapter_name == "akshare":
-        from alphaevo.data.adapters.akshare import AkShareAdapter
-        adapter = AkShareAdapter()
-    else:
-        raise ValueError(f"Unknown adapter: {adapter_name}")
+    config = config.model_copy(
+        update={"data": config.data.model_copy(update={"adapter": adapter_name})}
+    )
+    adapters = get_adapter_chain(config)
 
-    dm = DataManager([adapter], cache=DataCache(config.data.cache_dir))
+    dm = DataManager(
+        adapters,
+        cache=DataCache(config.data.cache_dir),
+        failure_threshold=config.data.source_failure_threshold,
+        cooldown_seconds=config.data.source_cooldown_seconds,
+    )
     data: dict[str, pd.DataFrame] = {}
     for sym in symbols:
         try:
@@ -219,7 +225,7 @@ def _run_validation(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Validate strategies on real data")
-    parser.add_argument("--adapter", default="yfinance", choices=["yfinance", "akshare"])
+    parser.add_argument("--adapter", default="auto", choices=["auto", "tencent", "yfinance", "akshare"])
     parser.add_argument("--days", type=int, default=365, help="Lookback period in days")
     parser.add_argument("--output", default="reports", help="Output directory")
     args = parser.parse_args()

@@ -10,6 +10,7 @@ from alphaevo.models.enums import (
 )
 from alphaevo.models.execution import (
     EvaluationReport,
+    EventContextMetrics,
     OverallMetrics,
 )
 from alphaevo.models.strategy import (
@@ -227,6 +228,22 @@ class TestContextBuilder:
             _evaluation(signal_count=100, win_rate=0.60, max_drawdown=0.08)
         )
         assert len(problems) == 0
+
+    def test_classify_data_quality_when_event_context_is_proxy_heavy(self):
+        builder = ContextBuilder()
+        evaluation = _evaluation(signal_count=100, win_rate=0.60, max_drawdown=0.08)
+        evaluation.event_context = EventContextMetrics(
+            total_symbols=20,
+            provider_symbols=2,
+            proxy_symbols=18,
+            provider_coverage=0.10,
+            proxy_only_coverage=0.90,
+            relevant_indicators=["negative_news_score"],
+        )
+
+        problems = builder._classify_problems(evaluation)
+
+        assert "data_quality" in problems
 
     def test_to_prompt_without_detail(self):
         builder = ContextBuilder()

@@ -22,7 +22,7 @@ from rich.text import Text
 
 from alphaevo.backtest.engine import BacktestEngine
 from alphaevo.core.config import ConfigManager
-from alphaevo.data.adapter import DataManager
+from alphaevo.data.adapter import DataManager, get_adapter_chain
 from alphaevo.data.cache import DataCache
 from alphaevo.evaluator.metrics import Evaluator
 from alphaevo.models.enums import ChangeType
@@ -1533,17 +1533,33 @@ async def _fetch_real_data(symbols: list[str], adapter_name: str) -> dict[str, p
     end = date.today()
     start = end - timedelta(days=180)
 
-    if adapter_name == "akshare":
+    config = ConfigManager().load()
+    if hasattr(config, "model_copy") and hasattr(config.data, "model_copy"):
+        adapter_config = config.model_copy(
+            update={"data": config.data.model_copy(update={"adapter": adapter_name})}
+        )
+        adapters = get_adapter_chain(adapter_config)
+    elif adapter_name == "akshare":
         from alphaevo.data.adapters.akshare import AkShareAdapter
 
-        adapter: DataAdapter = AkShareAdapter()
+        adapters: list[DataAdapter] = [AkShareAdapter()]
+    elif adapter_name in {"auto", "tencent"}:
+        from alphaevo.data.adapters.akshare import AkShareAdapter
+        from alphaevo.data.adapters.tencent import TencentAshareAdapter
+        from alphaevo.data.adapters.yfinance import YFinanceAdapter
+
+        adapters = [TencentAshareAdapter(), AkShareAdapter(), YFinanceAdapter()]
     else:
         from alphaevo.data.adapters.yfinance import YFinanceAdapter
 
-        adapter = YFinanceAdapter()
+        adapters = [YFinanceAdapter()]
 
-    cache_dir = ConfigManager().load().data.cache_dir
-    data_manager = DataManager([adapter], cache=DataCache(cache_dir))
+    data_manager = DataManager(
+        adapters,
+        cache=DataCache(config.data.cache_dir),
+        failure_threshold=getattr(config.data, "source_failure_threshold", 3),
+        cooldown_seconds=getattr(config.data, "source_cooldown_seconds", 60.0),
+    )
 
     async def _fetch_one(sym: str) -> tuple[str, pd.DataFrame | None]:
         try:

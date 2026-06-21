@@ -279,7 +279,10 @@ def _sanitize_condition_value(raw: Any) -> Any:
 
     LLMs sometimes output to_value as '"< 65.0"' or '">= 1.5"' instead of
     the bare number.  We detect the pattern and extract the numeric part.
-    Boolean strings ('true'/'false') are also normalised.
+    Boolean strings ('true'/'false') are also normalised.  Values may arrive
+    with YAML/LLM quote characters preserved as part of the string, e.g.
+    "'0.01'"; strip those before coercion so numeric thresholds remain numeric
+    after mutation and serialization round-trips.
     """
     if not isinstance(raw, str):
         return raw
@@ -287,6 +290,8 @@ def _sanitize_condition_value(raw: Any) -> Any:
     stripped = re.sub(r"^[<>=!]+\s*", "", raw).strip()
     if not stripped:
         return raw
+    if len(stripped) >= 2 and stripped[0] == stripped[-1] and stripped[0] in {"'", '"'}:
+        stripped = stripped[1:-1].strip()
     # Boolean
     if stripped.lower() in ("true", "false"):
         return stripped.lower() == "true"

@@ -313,8 +313,11 @@ class LLMConfig(BaseModel):
     base_url: Optional[str] = None
 
 class DataConfig(BaseModel):
-    adapter: str = "yfinance"            # yfinance / akshare / dsa
+    adapter: str = "auto"                # auto / tencent / yfinance / akshare / dsa
     cache_dir: Path = Path.home() / ".alphaevo" / "cache"
+    dsa_path: Optional[str] = None        # daily_stock_analysis bridge
+    source_failure_threshold: int = 3     # repeated failures before cooldown
+    source_cooldown_seconds: float = 60.0
 
 class BacktestConfig(BaseModel):
     slippage: float = 0.001
@@ -384,10 +387,19 @@ class DataAdapter(ABC):
 
 class DataManager:
     """统一数据管理器，支持多数据源 fallback"""
-    def __init__(self, adapters: list[DataAdapter]): ...
+    def __init__(self, adapters: list[DataAdapter], *, failure_threshold: int = 3,
+                 cooldown_seconds: float = 60.0): ...
     async def get_snapshot(self, symbol: str, date: date) -> MarketSnapshot: ...
     async def get_history(self, symbol: str, start: date, end: date) -> pd.DataFrame: ...
+    async def get_realtime_quote(self, symbol: str) -> Optional[RealTimeQuote]: ...
+    def health_status(self) -> list[DataSourceHealth]: ...
+
+class DataSourceHealth(BaseModel):
+    """数据源健康状态：success/failure/consecutive_failures/disabled/last_error/recent_errors"""
 ```
+
+默认 `auto` 链路为：`dsa`（配置了 `dsa_path` 才启用）→ `tencent` → `akshare` → `yfinance`。
+其中 `tencent` 是直接 HTTP K 线/实时行情源，承担 A 股 OHLCV 稳定性；DSA/AkShare/YFinance 继续提供股票池与丰富上下文 fallback。
 
 ### 3.2 Strategy Layer
 
@@ -676,6 +688,10 @@ class YFinanceAdapter(DataAdapter):
 # src/alphaevo/data/adapters/akshare.py [已实现]
 class AkShareAdapter(DataAdapter):
     """akshare 数据源，支持 A 股全量"""
+
+# src/alphaevo/data/adapters/tencent.py [已实现]
+class TencentAshareAdapter(DataAdapter):
+    """腾讯直接 K 线/实时行情源，作为 A 股 OHLCV 稳定性优先 fallback"""
 ```
 
 ### 7.2 DSA 插件适配器

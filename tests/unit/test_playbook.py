@@ -21,6 +21,7 @@ class TestPlaybookStore:
         ids = {pb.playbook_id for pb in all_pb}
         assert "builtin_low_signals" in ids
         assert "builtin_high_drawdown" in ids
+        assert "builtin_data_quality_first" in ids
 
     def test_save_and_get(self):
         pb = ResearchPlaybook(
@@ -54,6 +55,13 @@ class TestPlaybookStore:
         text = self.store.format_for_prompt(["low_signals", "high_drawdown"])
         assert "Research Playbooks" in text
         assert "Step 1:" in text
+
+    def test_data_quality_playbook_guides_source_diagnosis(self):
+        text = self.store.format_for_prompt(["data_quality"])
+
+        assert "Data quality first diagnosis" in text
+        assert "Before mutating the strategy" in text
+        assert "proxy-derived" in text
 
     def test_format_empty_category(self):
         text = self.store.format_for_prompt(["nonexistent_category"])

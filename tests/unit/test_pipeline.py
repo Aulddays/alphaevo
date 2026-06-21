@@ -644,6 +644,11 @@ class TestCreateAdapter:
         adapter = RunPipeline._create_adapter("akshare")
         assert adapter.name == "akshare"
 
+    def test_auto_adapter_chain_prioritizes_direct_a_share_source(self):
+        adapters = RunPipeline._create_adapters("auto")
+
+        assert [adapter.name for adapter in adapters] == ["tencent", "akshare", "yfinance"]
+
     def test_dsa_adapter_bridge_passes_path(self):
         with patch("alphaevo.data.adapters.dsa.DSAAdapter") as MockDSA:
             adapter = MagicMock()
@@ -657,6 +662,24 @@ class TestCreateAdapter:
 
         MockDSA.assert_called_once_with(dsa_path="/tmp/daily_stock_analysis")
         assert result.name == "dsa"
+
+    def test_auto_adapter_chain_can_include_dsa_bridge_first(self):
+        with patch("alphaevo.data.adapters.dsa.DSAAdapter") as MockDSA:
+            adapter = MagicMock()
+            adapter.name = "dsa"
+            MockDSA.return_value = adapter
+
+            adapters = RunPipeline._create_adapters(
+                "auto",
+                dsa_path="/tmp/daily_stock_analysis",
+            )
+
+        assert [adapter.name for adapter in adapters] == [
+            "dsa",
+            "tencent",
+            "akshare",
+            "yfinance",
+        ]
 
     def test_yfinance_adapter(self):
         adapter = RunPipeline._create_adapter("yfinance")
