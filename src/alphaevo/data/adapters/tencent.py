@@ -117,7 +117,7 @@ class TencentAshareAdapter(DataAdapter):
     def _fetch_quote_text(code: str) -> str:
         request = Request(f"{_TENCENT_QUOTE_URL}{code}", headers=_HEADERS)
         with urlopen(request, timeout=10) as response:  # noqa: S310 - fixed HTTPS endpoint.
-            return response.read().decode("gbk", errors="ignore")
+            return cast("str", response.read().decode("gbk", errors="ignore"))
 
     @staticmethod
     def _parse_quote_text(text: str, code: str) -> RealTimeQuote | None:

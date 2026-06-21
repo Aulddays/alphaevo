@@ -1534,28 +1534,29 @@ async def _fetch_real_data(symbols: list[str], adapter_name: str) -> dict[str, p
     start = end - timedelta(days=180)
 
     config = ConfigManager().load()
+    adapter_chain: list[DataAdapter]
     if hasattr(config, "model_copy") and hasattr(config.data, "model_copy"):
         adapter_config = config.model_copy(
             update={"data": config.data.model_copy(update={"adapter": adapter_name})}
         )
-        adapters = get_adapter_chain(adapter_config)
+        adapter_chain = get_adapter_chain(adapter_config)
     elif adapter_name == "akshare":
         from alphaevo.data.adapters.akshare import AkShareAdapter
 
-        adapters: list[DataAdapter] = [AkShareAdapter()]
+        adapter_chain = [AkShareAdapter()]
     elif adapter_name in {"auto", "tencent"}:
         from alphaevo.data.adapters.akshare import AkShareAdapter
         from alphaevo.data.adapters.tencent import TencentAshareAdapter
         from alphaevo.data.adapters.yfinance import YFinanceAdapter
 
-        adapters = [TencentAshareAdapter(), AkShareAdapter(), YFinanceAdapter()]
+        adapter_chain = [TencentAshareAdapter(), AkShareAdapter(), YFinanceAdapter()]
     else:
         from alphaevo.data.adapters.yfinance import YFinanceAdapter
 
-        adapters = [YFinanceAdapter()]
+        adapter_chain = [YFinanceAdapter()]
 
     data_manager = DataManager(
-        adapters,
+        adapter_chain,
         cache=DataCache(config.data.cache_dir),
         failure_threshold=getattr(config.data, "source_failure_threshold", 3),
         cooldown_seconds=getattr(config.data, "source_cooldown_seconds", 60.0),
