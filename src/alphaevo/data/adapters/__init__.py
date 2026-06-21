@@ -4,7 +4,13 @@ from __future__ import annotations
 
 from typing import Any
 
-__all__ = ["AdanosSentimentAdapter", "AkShareAdapter", "DSAAdapter", "YFinanceAdapter"]
+__all__ = [
+    "AdanosSentimentAdapter",
+    "AkShareAdapter",
+    "DSAAdapter",
+    "TencentAshareAdapter",
+    "YFinanceAdapter",
+]
 
 
 def __getattr__(name: str) -> Any:
@@ -17,6 +23,10 @@ def __getattr__(name: str) -> Any:
         from alphaevo.data.adapters.akshare import AkShareAdapter
 
         return AkShareAdapter
+    if name == "TencentAshareAdapter":
+        from alphaevo.data.adapters.tencent import TencentAshareAdapter
+
+        return TencentAshareAdapter
     if name == "DSAAdapter":
         from alphaevo.data.adapters.dsa import DSAAdapter
 

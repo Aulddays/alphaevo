@@ -31,11 +31,13 @@ class LLMConfig(BaseModel):
 class DataConfig(BaseModel):
     """Data source configuration."""
 
-    adapter: str = "yfinance"  # core: yfinance / akshare; optional bridge: dsa
+    adapter: str = "auto"  # auto chain: optional dsa -> tencent -> akshare -> yfinance
     cache_dir: Path = Field(default_factory=lambda: Path.home() / ".alphaevo" / "cache")
     dsa_path: str | None = None  # optional daily_stock_analysis bridge path
     adanos_api_key: str | None = None  # optional Adanos event/news sentiment bridge
     adanos_base_url: str = "https://api.adanos.org"
+    source_failure_threshold: int = Field(default=3, ge=1)
+    source_cooldown_seconds: float = Field(default=60.0, ge=0.0)
 
 
 class BacktestConfig(BaseModel):
@@ -90,6 +92,8 @@ _ENV_MAP: dict[str, str] = {
     "ALPHAEVO_DATA_ADAPTER": "data.adapter",
     "ALPHAEVO_CACHE_DIR": "data.cache_dir",
     "ALPHAEVO_DSA_PATH": "data.dsa_path",
+    "ALPHAEVO_DATA_SOURCE_FAILURE_THRESHOLD": "data.source_failure_threshold",
+    "ALPHAEVO_DATA_SOURCE_COOLDOWN_SECONDS": "data.source_cooldown_seconds",
     "ADANOS_API_KEY": "data.adanos_api_key",
     "ALPHAEVO_ADANOS_API_KEY": "data.adanos_api_key",
     "ADANOS_API_BASE_URL": "data.adanos_base_url",

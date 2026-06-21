@@ -257,6 +257,13 @@ class ContextBuilder:
             if af.train_val_gap > 0.10:
                 problems.append("overfit")
 
+        if evaluation.event_context is not None:
+            event = evaluation.event_context
+            if event.relevant_indicators and (
+                event.provider_coverage < 0.30 or event.proxy_only_coverage > 0.50
+            ):
+                problems.append("data_quality")
+
         return problems
 
     def _build_full_history(self, rounds: list[EvolutionRound]) -> str:

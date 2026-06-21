@@ -57,7 +57,7 @@ app.command("tree")(tree_command)
 
 # ── Init ───────────────────────────────────────────────────────────────
 
-_CORE_DATA_ADAPTERS = ["yfinance", "akshare"]
+_CORE_DATA_ADAPTERS = ["auto", "tencent", "yfinance", "akshare"]
 _OPTIONAL_DATA_BRIDGES = ["dsa"]
 _KNOWN_DATA_ADAPTERS = [*_CORE_DATA_ADAPTERS, *_OPTIONAL_DATA_BRIDGES]
 _LLM_MODELS = [
@@ -79,11 +79,11 @@ def init() -> None:
 
     # 1. Data adapter
     console.print("\n[bold]1. Data source[/bold]")
-    console.print("  Core adapters: yfinance (default), akshare (A-share)")
+    console.print("  Core adapters: auto (default), tencent (A-share K-line), yfinance, akshare")
     console.print(
         "  Optional bridge: dsa [dim](daily_stock_analysis enhancement, requires ALPHAEVO_DSA_PATH)[/dim]"
     )
-    adapter = typer.prompt("  Choose data adapter", default="yfinance")
+    adapter = typer.prompt("  Choose data adapter", default="auto")
     if adapter not in _KNOWN_DATA_ADAPTERS:
         console.print(f"[yellow]Warning: '{adapter}' is not a known adapter, using anyway[/yellow]")
     elif adapter in _OPTIONAL_DATA_BRIDGES:

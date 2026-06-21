@@ -923,6 +923,17 @@ class TestSanitizeConditionValue:
 
         assert _sanitize_condition_value("65.0") == 65.0
 
+    def test_quoted_numeric_string(self):
+        from alphaevo.reflection.mutator import _sanitize_condition_value
+
+        assert _sanitize_condition_value("'0.01'") == 0.01
+        assert _sanitize_condition_value('"0.01"') == 0.01
+
+    def test_operator_prefixed_quoted_numeric_string(self):
+        from alphaevo.reflection.mutator import _sanitize_condition_value
+
+        assert _sanitize_condition_value("<= '0.01'") == 0.01
+
     def test_integer_string(self):
         from alphaevo.reflection.mutator import _sanitize_condition_value
 

@@ -143,8 +143,10 @@
 | `llm.model` | `ALPHAEVO_LLM_MODEL` | `gemini/gemini-2.0-flash` | 策略生成/反思用的 LLM |
 | `llm.reflect_model` | `ALPHAEVO_LLM_REFLECT_MODEL` | 空（复用 llm.model） | 反思专用模型 |
 | `llm.api_key` | `ALPHAEVO_API_KEY` | — | LLM API Key（**仅通过环境变量**） |
-| `data.adapter` | `ALPHAEVO_DATA_ADAPTER` | `yfinance` | 数据源：yfinance / akshare / dsa |
+| `data.adapter` | `ALPHAEVO_DATA_ADAPTER` | `auto` | 数据源：auto / tencent / yfinance / akshare / dsa；auto 为 dsa(可选) → tencent → akshare → yfinance |
 | `data.cache_dir` | `ALPHAEVO_CACHE_DIR` | `~/.alphaevo/cache/` | 数据缓存目录 |
+| `data.source_failure_threshold` | `ALPHAEVO_DATA_SOURCE_FAILURE_THRESHOLD` | `3` | 单数据源连续失败达到阈值后临时熔断 |
+| `data.source_cooldown_seconds` | `ALPHAEVO_DATA_SOURCE_COOLDOWN_SECONDS` | `60.0` | 数据源熔断冷却秒数 |
 | `db.path` | `ALPHAEVO_DB_PATH` | `~/.alphaevo/alphaevo.db` | SQLite 数据库路径 |
 | `backtest.slippage` | — | `0.001` | 默认滑点 |
 | `backtest.commission` | — | `0.0003` | 默认手续费率 |
@@ -175,20 +177,29 @@ alphaevo init
 ## 6. 兼容性设计
 
 ### 独立模式
-AlphaEvo 可完全独立运行，内置轻量数据获取能力（通过 yfinance/akshare）。
+AlphaEvo 可完全独立运行，内置轻量数据获取能力（通过 auto / tencent / yfinance / akshare）。
 
 ### 插件模式
 通过 adapter 对接 daily_stock_analysis 的 `DataFetcherManager`，复用其多数据源 fallback 能力。
 
 ```python
 # 独立模式
-from alphaevo.data.adapters.yfinance import YFinanceAdapter
-data_manager = DataManager([YFinanceAdapter()])
+from alphaevo.core.config import AppConfig
+from alphaevo.data.adapter import DataManager, get_adapter_chain
+data_manager = DataManager(get_adapter_chain(AppConfig()))
 
 # 插件模式
 from alphaevo.data.adapters.dsa import DSAAdapter
 data_manager = DataManager([DSAAdapter(dsa_path="/path/to/dsa")])
 ```
+
+`auto` 数据链是当前默认：`dsa`（可选，配置了 `data.dsa_path` 才启用）→ `tencent` → `akshare` → `yfinance`。
+`tencent` 是轻量直接 K 线/实时行情源，优先用于 A 股 OHLCV 稳定性；`DSA/AkShare` 继续承担更丰富的股票池、行业/事件上下文。
+`DataManager.health_status()` 返回各数据源 success/failure/consecutive_failures/disabled/last_error/recent_errors，供 run/evolve 诊断和报告使用。
+
+### 数据质量优先进化规则
+
+LLM 反思/进化前必须先检查数据质量：当事件/新闻指标主要来自 proxy、provider coverage 很低、或数据源连续失败时，优先触发 `data_quality` playbook，先诊断数据链路与 proxy 可靠性，再决定是否修改策略规则。不要让 LLM 对低质量或 proxy-only 数据过度调参。
 
 > **目录约定**: 所有具体数据适配器放在 `src/alphaevo/data/adapters/`，不放顶层 `src/alphaevo/adapters/`（该目录废弃）。
 

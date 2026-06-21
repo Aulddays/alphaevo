@@ -10,7 +10,7 @@ import pytest
 from alphaevo.data.adapter import DataAdapter, DataManager
 from alphaevo.data.cache import DataCache
 from alphaevo.models.enums import MarketType
-from alphaevo.models.market import MarketContext
+from alphaevo.models.market import MarketContext, RealTimeQuote, StockInfo
 
 
 def _make_history(
@@ -40,6 +40,7 @@ class _StubAdapter(DataAdapter):
     def __init__(self) -> None:
         self.daily_calls = 0
         self.index_calls = 0
+        self.quote_calls = 0
         self.market_context_calls = 0
         self._stock_df = _make_history(date(2024, 1, 1), 120, base_price=100.0)
         self._index_df = _make_history(date(2024, 1, 1), 120, base_price=3000.0)
@@ -59,11 +60,35 @@ class _StubAdapter(DataAdapter):
         self.index_calls += 1
         return self._index_df.copy()
 
+    async def get_realtime_quote(self, symbol: str) -> RealTimeQuote | None:
+        self.quote_calls += 1
+        return RealTimeQuote(symbol=symbol, name="Stub", price=10.0, change_pct=1.0, volume=100)
+
     async def get_market_context(self, market: MarketType) -> MarketContext | None:
         self.market_context_calls += 1
         if market != MarketType.A_SHARE:
             return None
         return MarketContext(breadth=0.62, sentiment_index=0.58)
+
+
+class _FailingAdapter(DataAdapter):
+    def __init__(self, name: str = "failing") -> None:
+        self._name = name
+        self.daily_calls = 0
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    async def get_daily_data(self, symbol: str, days: int = 120) -> pd.DataFrame:
+        self.daily_calls += 1
+        raise RuntimeError("source down")
+
+    async def get_stock_list(self, market: MarketType) -> list[StockInfo]:
+        return []
+
+    async def get_realtime_quote(self, symbol: str) -> RealTimeQuote | None:
+        raise RuntimeError("quote source down")
 
 
 @pytest.mark.asyncio
@@ -139,3 +164,40 @@ async def test_get_market_context_uses_adapter_fallback():
     assert context is not None
     assert context.breadth == 0.62
     assert adapter.market_context_calls == 1
+
+@pytest.mark.asyncio
+async def test_daily_data_circuit_breaker_skips_repeatedly_failing_source():
+    primary = _FailingAdapter()
+    fallback = _StubAdapter()
+    manager = DataManager(
+        [primary, fallback],
+        failure_threshold=1,
+        cooldown_seconds=60,
+    )
+
+    first = await manager.get_daily_data("000001", 30)
+    second = await manager.get_daily_data("000001", 30)
+
+    assert not first.empty
+    assert not second.empty
+    assert primary.daily_calls == 1
+    assert fallback.daily_calls == 2
+
+
+@pytest.mark.asyncio
+async def test_get_realtime_quote_uses_fallback_and_updates_health():
+    primary = _FailingAdapter()
+    fallback = _StubAdapter()
+    manager = DataManager([primary, fallback], failure_threshold=1, cooldown_seconds=60)
+
+    quote = await manager.get_realtime_quote("000001")
+    health = manager.health_status()
+
+    assert quote is not None
+    assert quote.price == 10.0
+    assert health[0].name == "failing"
+    assert health[0].disabled is True
+    assert health[0].failure_count == 1
+    assert health[0].recent_errors == ["quote source down"]
+    assert health[1].name == "stub"
+    assert health[1].success_count == 1

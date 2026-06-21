@@ -222,6 +222,30 @@ _BUILTIN_PLAYBOOKS: list[ResearchPlaybook] = [
         ],
         source="builtin",
     ),
+    ResearchPlaybook(
+        playbook_id="builtin_data_quality_first",
+        name="Data quality first diagnosis",
+        trigger="provider coverage is low OR proxy-only/event context dominates OR source errors are present",
+        problem_category="data_quality",
+        steps=[
+            PlaybookStep(
+                action="verify_source_chain",
+                target="data.adapter",
+                detail="Before mutating the strategy, check whether data came from direct, wrapper, fallback, stale-cache, or proxy-only sources",
+            ),
+            PlaybookStep(
+                action="prefer_robust_sources",
+                target="data.adapter",
+                detail="For A-share OHLCV, prefer direct Tencent/Sina-style K-line sources before wrapper-heavy providers; use DSA/AkShare for richer context",
+            ),
+            PlaybookStep(
+                action="avoid_overfitting_to_proxy",
+                target="reflection",
+                detail="If event/news indicators are mostly proxy-derived, simplify or replace proxy conditions instead of tuning thresholds aggressively",
+            ),
+        ],
+        source="builtin",
+    ),
 ]
 
 

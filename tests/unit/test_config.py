@@ -21,7 +21,7 @@ class TestAppConfig:
     def test_default_config(self) -> None:
         config = AppConfig()
         assert config.llm.model == "gemini/gemini-2.0-flash"
-        assert config.data.adapter == "yfinance"
+        assert config.data.adapter == "auto"
         assert config.backtest.slippage == 0.001
         assert config.backtest.commission == 0.0003
         assert config.backtest.fill_policy == "conservative"
@@ -30,6 +30,8 @@ class TestAppConfig:
         assert config.backtest.walk_forward_pass_gap == 0.10
         assert config.backtest.stress_window_days == 20
         assert config.backtest.stress_window_top_k == 3
+        assert config.data.source_failure_threshold == 3
+        assert config.data.source_cooldown_seconds == 60.0
         assert config.evolution.max_rounds == 5
         assert config.evolution.max_changes_per_round == 3
 
@@ -112,12 +114,15 @@ class TestConfigManager:
 
     def test_load_defaults(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.chdir(tmp_path)
+        monkeypatch.delenv("ALPHAEVO_LLM_MODEL", raising=False)
+        monkeypatch.delenv("ALPHAEVO_DATA_ADAPTER", raising=False)
         mgr = ConfigManager()
         # Prevent loading real user config from ~/.alphaevo/config.yaml
         monkeypatch.setattr(mgr, "USER_CONFIG_FILE", tmp_path / "no_such_config.yaml")
         config = mgr.load()
         assert isinstance(config, AppConfig)
         assert config.llm.model == "gemini/gemini-2.0-flash"
+        assert config.data.adapter == "auto"
 
     def test_load_with_cli_overrides(self) -> None:
         mgr = ConfigManager()
@@ -133,6 +138,8 @@ class TestConfigManager:
         monkeypatch.setenv("ALPHAEVO_BACKTEST_FILL_POLICY", "close_first")
         monkeypatch.setenv("ALPHAEVO_BACKTEST_STRESS_WINDOW_DAYS", "15")
         monkeypatch.setenv("ALPHAEVO_BACKTEST_STRESS_WINDOW_TOP_K", "2")
+        monkeypatch.setenv("ALPHAEVO_DATA_SOURCE_FAILURE_THRESHOLD", "2")
+        monkeypatch.setenv("ALPHAEVO_DATA_SOURCE_COOLDOWN_SECONDS", "15.5")
         mgr = ConfigManager()
         config = mgr.load()
         assert config.llm.model == "env-model"
@@ -143,6 +150,8 @@ class TestConfigManager:
         assert config.backtest.fill_policy == "close_first"
         assert config.backtest.stress_window_days == 15
         assert config.backtest.stress_window_top_k == 2
+        assert config.data.source_failure_threshold == 2
+        assert config.data.source_cooldown_seconds == 15.5
 
     def test_load_from_project_env_file(
         self,

@@ -20,8 +20,8 @@ import pandas as pd
 
 from alphaevo.backtest.engine import BacktestEngine
 from alphaevo.backtest.indicators import merge_event_context
-from alphaevo.core.config import AppConfig
-from alphaevo.data.adapter import DataAdapter, DataManager
+from alphaevo.core.config import AppConfig, DataConfig
+from alphaevo.data.adapter import DataAdapter, DataManager, DataSourceHealth, get_adapter_chain
 from alphaevo.data.cache import DataCache
 from alphaevo.evaluator.metrics import Evaluator
 from alphaevo.evaluator.reporter import Reporter
@@ -101,6 +101,7 @@ class RunResult:
     backtest_result: BacktestResult
     evaluation: EvaluationReport
     report_path: Path | None = field(default=None)
+    data_source_health: list[DataSourceHealth] = field(default_factory=list)
     # Retained for post-hoc analysis (param sensitivity, etc.)
     _engine: object | None = field(default=None, repr=False)
     _data: dict | None = field(default=None, repr=False)
@@ -129,21 +130,29 @@ class RunPipeline:
     @property
     def data_manager(self) -> DataManager:
         if self._data_manager is None:
-            adapter = self._create_adapter(
-                self.config.data.adapter,
-                dsa_path=self.config.data.dsa_path,
-            )
-            adapters = [adapter]
+            adapters = get_adapter_chain(self.config)
             adanos = self._create_adanos_context_adapter()
             if adanos is not None:
                 adapters.insert(0, adanos)
             self._data_manager = DataManager(
                 adapters,
                 cache=DataCache(self.config.data.cache_dir),
+                failure_threshold=self.config.data.source_failure_threshold,
+                cooldown_seconds=self.config.data.source_cooldown_seconds,
             )
         return self._data_manager
 
     # -- adapter factory ------------------------------------------------
+
+    @staticmethod
+    def _create_adapters(
+        adapter_name: str,
+        *,
+        dsa_path: str | None = None,
+    ) -> list[DataAdapter]:
+        """Factory for ordered data adapter chains."""
+        config = AppConfig(data=DataConfig(adapter=adapter_name, dsa_path=dsa_path))
+        return get_adapter_chain(config)
 
     @staticmethod
     def _create_adapter(
@@ -151,33 +160,8 @@ class RunPipeline:
         *,
         dsa_path: str | None = None,
     ) -> DataAdapter:
-        """Factory for data adapters."""
-        if adapter_name == "yfinance":
-            from alphaevo.data.adapters.yfinance import YFinanceAdapter
-
-            return YFinanceAdapter()
-
-        if adapter_name == "akshare":
-            from alphaevo.data.adapters.akshare import AkShareAdapter
-
-            return AkShareAdapter()
-
-        if adapter_name == "dsa":
-            from alphaevo.data.adapters.dsa import DSAAdapter
-
-            try:
-                return DSAAdapter(dsa_path=dsa_path)
-            except ImportError as err:
-                raise ValueError(
-                    "Adapter 'dsa' is an optional daily_stock_analysis bridge. "
-                    "Configure ALPHAEVO_DSA_PATH (or data.dsa_path) to enable it, "
-                    "or use the core adapters: yfinance / akshare."
-                ) from err
-
-        raise ValueError(
-            f"Unknown adapter: {adapter_name}. Core adapters: yfinance, akshare; "
-            "optional bridge: dsa"
-        )
+        """Backward-compatible factory returning the first adapter in a chain."""
+        return RunPipeline._create_adapters(adapter_name, dsa_path=dsa_path)[0]
 
     def _create_adanos_context_adapter(self) -> DataAdapter | None:
         """Create the optional Adanos context adapter for yfinance US workflows."""
@@ -400,6 +384,7 @@ class RunPipeline:
             batch=batch,
             backtest_result=result,
             evaluation=evaluation,
+            data_source_health=self.data_manager.health_status(),
             _engine=engine,
             _data=data,
             _contexts=contexts,
